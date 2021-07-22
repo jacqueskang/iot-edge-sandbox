@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "stackName": {
+            "type": "string",
+            "defaultValue": "dev",
+            "metadata": {
+                "description": "Specify the name of the Iot hub."
+            }
+        }
+    },
+    "variables": {
+        "componentName": "[concat('raspi-sandbox-', parameters('stackName'))]",
+        "iotHubName": "[concat('iot-', variables('componentName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Devices/IotHubs",
+            "apiVersion": "2021-03-31",
+            "name": "[variables('iotHubName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "S1",
+                "capacity": 1
+            },
+            "properties": {}
+        }
+    ],
+    "outputs": {
+        "iotHubName": {
+            "type": "string",
+            "value": "[variables('iotHubName')]"
+        },
+        "iotHubHostName": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Devices/Iothubs', variables('iotHubName'))).hostName]"
+        }
+    }
+}
