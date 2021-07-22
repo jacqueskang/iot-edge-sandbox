@@ -11,8 +11,9 @@
         }
     },
     "variables": {
-        "componentName": "[concat('raspi-sandbox-', parameters('stackName'))]",
-        "iotHubName": "[concat('iot-', variables('componentName'))]"
+        "component": "[concat('raspi-sandbox-', parameters('stackName'))]",
+        "iotHubName": "[concat('iot-', variables('component'))]",
+        "logAnalyticsWorkspaceName": "[concat('log-', variables('component'))]",
     },
     "resources": [
         {
@@ -25,6 +26,18 @@
                 "capacity": 1
             },
             "properties": {}
+        },
+        {
+            "name": "[variables('logAnalyticsWorkspaceName')]",
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "apiVersion": "2020-03-01-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "sku": {
+                    "name": "Standard"
+                },
+                "retentionInDays": 30
+            }
         }
     ],
     "outputs": {
@@ -32,9 +45,17 @@
             "type": "string",
             "value": "[variables('iotHubName')]"
         },
-        "iotHubHostName": {
+        "iotHubResourceId": {
             "type": "string",
-            "value": "[reference(resourceId('Microsoft.Devices/Iothubs', variables('iotHubName'))).hostName]"
+            "value": "[resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))]"
+        },
+        "logAnalyticsWorkspaceId": {
+            "type": "string",
+            "value": "[reference(variables('logAnalyticsWorkspaceName'), '2020-03-01-preview').customerId]"
+        },
+        "logAnalyticsWorkspaceKey": {
+            "type": "string",
+            "value": "[listKeys(variables('logAnalyticsWorkspaceName'), '2020-03-01-preview').primarySharedKey]"
         }
     }
 }

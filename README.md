@@ -9,6 +9,8 @@ This repo contains my Azure IoT Edge sandbox
 - Install Azure CLI
 - Have a raspberry PI with Raspberry Pi OS installed
 - Being able to SSH into your Raspberry Pi
+- Install VS Code with following extensions
+  - Azure IoT Tools (vsciot-vscode.azure-iot-tools)
 
 ```bash
 az login
@@ -16,7 +18,7 @@ az login
 stack_name='dev' && \
 resource_group_name="rg-raspi-sandbox-$stack_name" && \
 deployment_name="deploy-$stack_name" && \
-pi_hostname='pi4b' # replace with hostname/ip of raspberry pi
+pi_hostname='pi4b' && \ # replace with hostname/ip of raspberry pi
 device_id='pi4b' # replace device id to be registered in IoT Hub
 
 # create resource group
@@ -30,7 +32,9 @@ az deployment group create \
 
 # extract deployment outputs
 iot_hub_name=$(az deployment group show -g $resource_group_name -n $deployment_name --query properties.outputs.iotHubName.value -o tsv)
-iot_hub_host_name=$(az deployment group show -g $resource_group_name -n $deployment_name --query properties.outputs.iotHubHostName.value -o tsv)
+iot_hub_resource_id=$(az deployment group show -g $resource_group_name -n $deployment_name --query properties.outputs.iotHubResourceId.value -o tsv)
+log_analytics_workspace_id=$(az deployment group show -g $resource_group_name -n $deployment_name --query properties.outputs.logAnalyticsWorkspaceId.value -o tsv)
+log_analytics_workspace_key=$(az deployment group show -g $resource_group_name -n $deployment_name --query properties.outputs.logAnalyticsWorkspaceKey.value -o tsv)
 
 # register IoT Edge device
 az iot hub device-identity create --hub-name $iot_hub_name --device-id $device_id --edge-enabled
@@ -70,5 +74,19 @@ sudo iotedge config apply
 # check iot edge logs
 sudo iotedge system logs -- -f # Ctrl+C to break out
 
+# exit ssh session and go back to host
 exit
+
+# generate .env file
+eval "cat <<EOF
+$(<.env.template)
+EOF
+" 1>'.env'
+
+# In VS code, right click on deployment.template.json and select "Generate IoT Edge Deployment Manifest" -->
+# This should generate config/deployment.arm32v7.json
+
+# deploy the modules to iot edge device
+az iot edge set-modules --device-id $device_id --hub-name $iot_hub_name --content 'config/deployment.arm32v7.json'
+
 ```
