@@ -80,8 +80,17 @@
               "VIDEO_PATH": {
                 "value": "0"
               },
+              "IMAGE_PROCESSING_ENDPOINT": {
+                "value": "http://objectDetection:80/image"
+              },
               "SHOW_VIDEO": {
                 "value": "True"
+              },
+              "VERBOSE": {
+                "value": "True"
+              },
+              "ANNOTATE": {
+                "value": "False"
               }
             },
             "settings": {
@@ -107,6 +116,16 @@
                   ]
                 }
               }
+            }
+          },
+          "objectDetection": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.ObjectDetection}",
+              "createOptions": {}
             }
           }
         }
