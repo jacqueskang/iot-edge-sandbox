@@ -35,6 +35,12 @@ iot_hub_name=$(az deployment group show -g $resource_group_name -n $deployment_n
 iot_hub_resource_id=$(az deployment group show -g $resource_group_name -n $deployment_name --query properties.outputs.iotHubResourceId.value -o tsv)
 log_analytics_workspace_id=$(az deployment group show -g $resource_group_name -n $deployment_name --query properties.outputs.logAnalyticsWorkspaceId.value -o tsv)
 log_analytics_workspace_key=$(az deployment group show -g $resource_group_name -n $deployment_name --query properties.outputs.logAnalyticsWorkspaceKey.value -o tsv)
+acr_server=$(az deployment group show -g $resource_group_name -n $deployment_name --query properties.outputs.acrServer.value -o tsv)
+acr_username=$(az deployment group show -g $resource_group_name -n $deployment_name --query properties.outputs.acrUsername.value -o tsv)
+acr_password=$(az deployment group show -g $resource_group_name -n $deployment_name --query properties.outputs.acrPassword.value -o tsv)
+
+# login acr
+az acr login -n $acr_server
 
 # register IoT Edge device
 az iot hub device-identity create --hub-name $iot_hub_name --device-id $device_id --edge-enabled

@@ -14,6 +14,7 @@
         "component": "[concat('raspi-sandbox-', parameters('stackName'))]",
         "iotHubName": "[concat('iot-', variables('component'))]",
         "logAnalyticsWorkspaceName": "[concat('log-', variables('component'))]",
+        "acrName": "[concat('acr', replace(variables('component'), '-', ''))]"
     },
     "resources": [
         {
@@ -38,6 +39,18 @@
                 },
                 "retentionInDays": 30
             }
+        },
+        {
+            "type": "Microsoft.ContainerRegistry/registries",
+            "apiVersion": "2019-12-01-preview",
+            "name": "[variables('acrName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "adminUserEnabled": true
+            }
         }
     ],
     "outputs": {
@@ -56,6 +69,18 @@
         "logAnalyticsWorkspaceKey": {
             "type": "string",
             "value": "[listKeys(variables('logAnalyticsWorkspaceName'), '2020-03-01-preview').primarySharedKey]"
+        },
+        "acrServer": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))).loginServer]"
+        },
+        "acrUsername": {
+            "type": "string",
+            "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2019-05-01').username]"
+        },
+        "acrPassword": {
+            "type": "string",
+            "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2019-05-01').passwords[0].value]"
         }
     }
 }

@@ -7,7 +7,14 @@
         "runtime": {
           "type": "docker",
           "settings": {
-            "minDockerVersion": "v1.25"
+            "minDockerVersion": "v1.25",
+            "registryCredentials": {
+              "default": {
+                "username": "$ACR_USERNAME",
+                "password": "$ACR_PASSWORD",
+                "address": "$ACR_SERVER"
+              }
+            }
           }
         },
         "systemModules": {
@@ -43,7 +50,7 @@
           }
         },
         "modules": {
-          "MetricsCollector": {
+          "metricsCollector": {
             "settings": {
               "image": "mcr.microsoft.com/azureiotedge-metrics-collector:1.0",
               "createOptions": {}
@@ -63,6 +70,44 @@
             "status": "running",
             "restartPolicy": "always",
             "version": "1.0"
+          },
+          "cameraCapture": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "VIDEO_PATH": {
+                "value": "0"
+              },
+              "SHOW_VIDEO": {
+                "value": "True"
+              }
+            },
+            "settings": {
+              "image": "${MODULES.CameraCapture.arm32v7}",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5012/tcp": [
+                      {
+                        "HostPort": "5012"
+                      }
+                    ]
+                  },
+                  "Binds": [
+                    "/dev/video0:/dev/video0"
+                  ],
+                  "Devices": [
+                    {
+                      "PathOnHost": "/dev/video0",
+                      "PathInContainer": "/dev/video0",
+                      "CgroupPermissions": "mrw"
+                    }
+                  ]
+                }
+              }
+            }
           }
         }
       }
