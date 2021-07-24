@@ -97,8 +97,10 @@ class CameraCapture(object):
         AnnotationParserInstance = AnnotationParser()
         #TODO: Make the choice of the service configurable
         listOfRectanglesToDisplay = AnnotationParserInstance.getCV2RectanglesFromProcessingService1(response)
+        width = frame.shape[1]
+        height = frame.shape[0]
         for rectangle in listOfRectanglesToDisplay:
-            cv2.rectangle(frame, (rectangle(0), rectangle(1)), (rectangle(2), rectangle(3)), (0,0,255),4)
+            cv2.rectangle(frame, (int(rectangle[0] * width), int(rectangle[1] * height)), (int(rectangle[2] * width), int(rectangle[3] * height)), (0,0,255),4)
         return
 
     def __sendFrameForProcessing(self, frame):
