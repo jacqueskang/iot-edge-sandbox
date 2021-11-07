@@ -50,7 +50,7 @@
           }
         },
         "modules": {
-          "metricsCollector": {
+          "MetricsCollector": {
             "settings": {
               "image": "mcr.microsoft.com/azureiotedge-metrics-collector:1.0",
               "createOptions": {}
@@ -74,7 +74,7 @@
             "restartPolicy": "always",
             "version": "1.0"
           },
-          "cameraCapture": {
+          "CameraCapture": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -112,13 +112,34 @@
               }
             }
           },
-          "ledAlert": {
+          "LedAlert": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
               "image": "${MODULES.LedAlert}",
+              "createOptions": {
+                "HostConfig": {
+                  "Privileged": true,
+                  "Devices": [
+                    {
+                      "PathOnHost": "/dev/gpiomem",
+                      "PathInContainer": "/dev/gpiomem",
+                      "CgroupPermissions": "mrw"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "PushButton": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.PushButton}",
               "createOptions": {
                 "HostConfig": {
                   "Privileged": true,
@@ -140,8 +161,7 @@
       "properties.desired": {
         "schemaVersion": "1.1",
         "routes": {
-          "allMessagesToHub": "FROM /messages/* INTO $upstream",
-          "LedAlertToIoTHub": "FROM /messages/modules/LedAlert/outputs/* INTO $upstream"
+          "PushButtonToLedAlert": "FROM /messages/modules/PushButton/outputs/* INTO BrokeredEndpoint(\"/modules/LedAlert/inputs/default\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200

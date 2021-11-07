@@ -11,9 +11,8 @@ import time
 
 import RPi.GPIO as GPIO
 from azure.iot.device.aio import IoTHubModuleClient
-from azure.iot.device import MethodResponse
 
-PIN_NUMBER = int(os.getenv('PIN_NUMBER', '7'))
+PIN_NUMBER = int(os.getenv('PIN_NUMBER', '10'))
 
 # Event indicating client stop
 stop_event = threading.Event()
@@ -21,47 +20,19 @@ stop_event = threading.Event()
 
 def create_client():
     client = IoTHubModuleClient.create_from_edge_environment()
-
-    # Define function for handling received messages
-    async def receive_message_handler(message):
-        print("Received message", message)
-        thread = threading.Thread(target=blink_led)
-        thread.start()
-        await client.send_message_to_output(message, "output1")
-
-    def blink_led():
-        for _ in range(10):
-            GPIO.output(PIN_NUMBER, GPIO.HIGH)
-            time.sleep(0.2)
-            GPIO.output(PIN_NUMBER, GPIO.LOW)
-            time.sleep(0.2)
-
-    async def receive_method_request_handler(method_request):
-        print("Method request", method_request)
-        thread = threading.Thread(target=blink_led)
-        thread.start()
-        method_response = MethodResponse.create_from_method_request(
-            method_request, 200, None)
-        await client.send_method_response(method_response)
-
-    try:
-        # Set handler on the client
-        client.on_message_received = receive_message_handler
-        client.on_method_request_received = receive_method_request_handler
-    except:
-        # Cleanup if failure occurs
-        client.shutdown()
-        raise
-
     return client
 
 
 async def run_sample(client):
-    # Customize this coroutine to do whatever tasks the module initiates
     GPIO.setmode(GPIO.BOARD)
     GPIO.setwarnings(False)
-    GPIO.setup(PIN_NUMBER, GPIO.OUT)
-    # e.g. sending messages
+    GPIO.setup(PIN_NUMBER, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+    def button_callback(channel):
+        print("Button was pushed!")
+        asyncio.run(client.send_message_to_output("pushed", "output1"))
+
+    GPIO.add_event_detect(PIN_NUMBER, GPIO.RISING, callback=button_callback)
     while True:
         await asyncio.sleep(1000)
 
@@ -79,6 +50,7 @@ def main():
     def module_termination_handler(signal, frame):
         print("IoTHubClient sample stopped by Edge")
         stop_event.set()
+        GPIO.cleanup()  # Clean up
 
     # Set the Edge termination handler
     signal.signal(signal.SIGTERM, module_termination_handler)
