@@ -65,6 +65,9 @@
               },
               "LogAnalyticsSharedKey": {
                 "value": "$LOG_ANALYTICS_WORKSPACE_KEY"
+              },
+              "MetricsEndpointsCSV": {
+                "value": "http://edgeHub:9600/metrics,http://edgeAgent:9600/metrics"
               }
             },
             "status": "running",
@@ -78,19 +81,13 @@
             "restartPolicy": "always",
             "env": {
               "VIDEO_PATH": {
-                "value": "0"
-              },
-              "IMAGE_PROCESSING_ENDPOINT": {
-                "value": "http://objectDetection:80/image"
+                "value": "/dev/video0"
               },
               "SHOW_VIDEO": {
                 "value": "True"
               },
               "VERBOSE": {
-                "value": "True"
-              },
-              "ANNOTATE": {
-                "value": "True"
+                "value": "False"
               }
             },
             "settings": {
@@ -104,9 +101,6 @@
                       }
                     ]
                   },
-                  "Binds": [
-                    "/dev/video0:/dev/video0"
-                  ],
                   "Devices": [
                     {
                       "PathOnHost": "/dev/video0",
@@ -118,14 +112,25 @@
               }
             }
           },
-          "objectDetection": {
+          "ledAlert": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "${MODULES.ObjectDetection}",
-              "createOptions": {}
+              "image": "${MODULES.LedAlert}",
+              "createOptions": {
+                "HostConfig": {
+                  "Privileged": true,
+                  "Devices": [
+                    {
+                      "PathOnHost": "/dev/gpiomem",
+                      "PathInContainer": "/dev/gpiomem",
+                      "CgroupPermissions": "mrw"
+                    }
+                  ]
+                }
+              }
             }
           }
         }
@@ -135,7 +140,8 @@
       "properties.desired": {
         "schemaVersion": "1.1",
         "routes": {
-          "allMessagesToHub": "FROM /messages/* INTO $upstream"
+          "allMessagesToHub": "FROM /messages/* INTO $upstream",
+          "LedAlertToIoTHub": "FROM /messages/modules/LedAlert/outputs/* INTO $upstream"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
