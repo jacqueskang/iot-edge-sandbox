@@ -81,13 +81,13 @@
             "restartPolicy": "always",
             "env": {
               "VIDEO_PATH": {
-                "value": "/dev/video0"
+                "value": "0"
               },
               "SHOW_VIDEO": {
                 "value": "True"
               },
               "VERBOSE": {
-                "value": "False"
+                "value": "True"
               }
             },
             "settings": {
