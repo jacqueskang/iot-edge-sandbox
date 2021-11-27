@@ -74,6 +74,27 @@
             "restartPolicy": "always",
             "version": "1.0"
           },
+          "ObjectDetection": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": { },
+            "settings": {
+              "image": "${MODULES.ObjectDetection.arm32v7}",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "80/tcp": [
+                      {
+                        "HostPort": "5000"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
           "CameraCapture": {
             "version": "1.0",
             "type": "docker",
@@ -87,6 +108,12 @@
                 "value": "True"
               },
               "VERBOSE": {
+                "value": "True"
+              },
+              "IMAGE_PROCESSING_ENDPOINT": {
+                "value": "http://ObjectDetection/image"
+              },
+              "ANNOTATE": {
                 "value": "True"
               }
             },
