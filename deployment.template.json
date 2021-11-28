@@ -10,9 +10,9 @@
             "minDockerVersion": "v1.25",
             "registryCredentials": {
               "default": {
-                "username": "$ACR_USERNAME",
-                "password": "$ACR_PASSWORD",
-                "address": "$ACR_SERVER"
+                "username": "$CONTAINER_REGISTRY_USERNAME",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "address": "$CONTAINER_REGISTRY_ADDRESS"
               }
             }
           }

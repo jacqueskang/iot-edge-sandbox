@@ -2,6 +2,10 @@
 
 This repo contains my Azure IoT Edge sandbox
 
+Ref
+https://github.com/Azure-Samples/Custom-vision-service-iot-edge-raspberry-pi/tree/master/modules/CameraCapture
+
+
 ## Deploy from local
 
 ### Prerequisites
